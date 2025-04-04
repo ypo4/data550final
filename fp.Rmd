@@ -1,0 +1,157 @@
+---
+title: "Final Project Sleep Effciency"
+author: "Yilin Zhang"
+date: "2025-02-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(glmnet)
+library(foreign)
+library(corrplot)
+library(ggcorrplot)
+library(knitr)
+```
+# Introduction 
+ This project will use the "Sleep_Efficiency.csv" dataset. This dataset contains multiple indicators related to sleep quality, sleep duration, sleep depth, and lifestyle habits (such as caffeine intake, smoking, exercise frequency, etc.). It aims to explore the possible relationship between different variables (such as caffeine intake, alcohol intake, exercise frequency, etc.) and sleep efficiency; build regression models and compare their prediction errors to evaluate the impact of these variables on sleep efficiency; and use tables and visualizations to better understand the data.
+ 
+## Load the Data
+```{r}
+sleep_data <- read_csv("C:/Users/Lenovo/Desktop/data550/final/Sleep_Efficiency.csv", show_col_types = FALSE)
+colnames(sleep_data) <- c("ID","age","gender","bedtime","wakeup_time","sleep_duration","sleep_efficiency","rem_sleep_percentage","deep_sleep_percentage","light_sleep_percentage","awakenings","caffeine_consumption","alchol_consumption","smoking_status","exercise_frequency")
+summary(sleep_data)
+```
+
+## Clean the data
+```{r}
+summary(is.na(sleep_data))
+
+sleep1 <- sleep_data %>%
+  na.omit()
+str(sleep1)
+```
+# Table 1: Descriptive Statistics 
+```{r}
+desc_stats <- sleep1 %>%
+  summarise(
+    Avg_Age = mean(age),
+    Min_Age = min(age),
+    Max_Age = max(age),
+    Avg_SleepDuration = mean(sleep_duration),
+    Avg_SleepEfficiency = mean(sleep_efficiency),
+    Avg_DeepSleepPct = mean(deep_sleep_percentage),
+    Avg_REM_SleepPct = mean(rem_sleep_percentage),
+    Avg_Awakenings = mean(awakenings)
+  )
+
+kable(desc_stats, caption = "Table 1. Selected Descriptive Statistics of the Sleep Data")
+```
+From Table 1, we can see that the average age of the subjects in this dataset is about 40.8 years old, the average sleep duration is about 7.45  hours, the average sleep efficiency is 0.789, the average deep sleep percentage and the average REM sleep percentage are 52.82% and 22.68% respectively.
+
+# EDA
+## Correlation between all the variables
+```{r}
+cor_data <- sleep1 %>%
+  select(sleep_efficiency, rem_sleep_percentage, deep_sleep_percentage, 
+         light_sleep_percentage, awakenings, caffeine_consumption, 
+         alchol_consumption, smoking_status, exercise_frequency, age, 
+         sleep_duration)
+
+#Calculate the correlation coefficient
+corr_matrix <- cor(
+  dplyr::select_if(cor_data, is.numeric), 
+  use="complete.obs" 
+)
+
+# plot
+ggcorrplot::ggcorrplot(corr_matrix,
+                       method="circle",
+                       type="lower",
+                       lab=TRUE, lab_size=3)
+
+                  
+```
+## Correlation between factors related to sleep efficiency
+```{r}
+sleep1 %>%
+  select(sleep_efficiency, deep_sleep_percentage, rem_sleep_percentage,
+         light_sleep_percentage, awakenings) %>% 
+  cor() %>%
+  corrplot(method = "number", type = "upper")
+```
+Sleep efficiency and deep sleep percentage show a strong positive correlation (about 0.79). In other words, the higher the proportion of deep sleep, the higher the sleep efficiency. Sleep efficiency and awakenings show a significant negative correlation (about -0.57). This means that if there are more awakenings during the night, the overall sleep efficiency tends to decrease. Deep sleep percentage and light sleep percentage show a significant negative correlation (about -0.98). This reflects the relationship between deep sleep and light sleep in a total sleep time: when deep sleep increases, light sleep will naturally decrease. The correlation between REM sleep percentage and sleep efficiency is not high (around 0 ~ 0.1), indicating that the impact of REM sleep percentage on overall sleep efficiency may be weak or not linear.
+
+# Figures Demonstrating Relationships
+## Caffeine Consumption vs. Sleep Efficiency
+```{r}
+sleep1 %>% 
+  ggplot(aes(x = caffeine_consumption, y = sleep_efficiency, color = gender)) +  
+  geom_point() +  
+  geom_smooth(method = "lm", se = FALSE, aes(group = gender)) +
+  theme_minimal()
+```
+From the scatter plot, we can see that the trends between caffeine intake and sleep efficiency are different for different genders. For males, it seems that the higher the caffeine intake, the higher the sleep efficiency. For females, the higher the caffeine intake, the lower the sleep efficiency. This result may be related to multiple factors such as individual differences, physiological mechanisms, and lifestyle habits.
+## Alcohol Consumption vs. Bedtime
+```{r}
+ggplot(data=sleep1, aes(x = alchol_consumption, y=bedtime))+
+  geom_point() +
+  stat_smooth(method="lm", se=TRUE) +
+  theme_minimal()
+```
+The regression line is relatively flat, indicating that the linear relationship between different alcohol intakes and bedtimes in this data set is not obvious, or that "how much alcohol you drink" does not seem to make people go to bed earlier or later.
+
+# Multiple Linear Regression
+
+```{r}
+sleep1 <- sleep_data
+sleep1$smoking_status <- as.factor(ifelse(sleep1$smoking_status == "Yes" , "0","1"))
+sleep2 <- sleep1 
+sleep2$gender <- as.factor(ifelse(sleep2$gender == "Female" , "0","1"))
+
+f1 <- lm(sleep_efficiency ~ deep_sleep_percentage, data=sleep2)
+summary(f1) #Adjusted R-squared:  0.6217 
+
+f2 <- lm(sleep_efficiency ~ deep_sleep_percentage + awakenings, data=sleep2) 
+summary(f2) #Adjusted R-squared:  0.7286 
+
+f3 <- lm(sleep_efficiency ~ deep_sleep_percentage + awakenings + 
+    alchol_consumption, data=sleep2) 
+summary(f3)   #Adjusted R-squared:  0.7339 
+
+f4 <- lm(sleep_efficiency ~ deep_sleep_percentage + awakenings + 
+    alchol_consumption + smoking_status, data=sleep2) 
+summary(f4)   #Adjusted R-squared:  0.7565 
+
+f5 <- lm(sleep_efficiency ~ deep_sleep_percentage + awakenings + 
+    alchol_consumption + smoking_status + exercise_frequency, data=sleep2)
+summary(f5)  #Adjusted R-squared:  0.7641
+
+f6 <- lm(sleep_efficiency ~ deep_sleep_percentage + awakenings + 
+    alchol_consumption + smoking_status + exercise_frequency + age, data=sleep2) 
+summary(f6)  #Adjusted R-squared:  0.7712 
+
+f7 <- lm(sleep_efficiency ~ deep_sleep_percentage + awakenings + 
+    alchol_consumption + smoking_status + exercise_frequency + age + caffeine_consumption, data=sleep2) 
+summary(f7)  #Adjusted R-squared:   0.7746
+
+f8 <- lm(sleep_efficiency ~ deep_sleep_percentage + awakenings + 
+    alchol_consumption + smoking_status + exercise_frequency + age + caffeine_consumption + rem_sleep_percentage, data=sleep2) 
+summary(f8)  #Adjusted R-squared:  0.8008 
+
+f9 <- lm(sleep_efficiency ~ deep_sleep_percentage + awakenings + 
+    alchol_consumption + smoking_status + exercise_frequency + age + caffeine_consumption + rem_sleep_percentage + sleep_duration, data=sleep2) 
+summary(f9) #Adjusted R-squared:  0.8004 
+
+f10 <- lm(sleep_efficiency ~ deep_sleep_percentage + awakenings + 
+    alchol_consumption + smoking_status + exercise_frequency + age + caffeine_consumption + rem_sleep_percentage + sleep_duration + gender, data=sleep2) 
+summary(f10)  #Adjusted R-squared:  0.7999 
+
+```
+From the perspective of multiple linear regression, the f8 model performed best (Adjusted R^2 ~ 0.80). Considering only the linear model, the model that included eight variables, deep sleep proportion, number of awakenings, alcohol intake, smoking, exercise frequency, age, caffeine intake, and REM sleep proportion, seemed to be able to best explain or predict sleep efficiency.
+
+
+
