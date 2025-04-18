@@ -1,38 +1,23 @@
 # ----------------------------------------------------------
 # Makefile for Final Project: Sleep Efficiency
-
-# This Makefile compiles fp.Rmd into an HTML report.
-
-#
-# INTERNAL STRUCTURE:
-# 1) data/ - stores the dataset (e.g. Sleep_Efficiency.csv)
-# 2) fp.Rmd - main R Markdown report
-# 3) Makefile - the file that automates the build process
-
-#
-# Usage:
-# In terminal or Git Bash, navigate to the project folder and run:
-#   make          (builds the default target, here it's 'report')
-#   make clean    (removes generated output files, like fp.html)
-# 
+# Author: Yilin Zhang
 # ----------------------------------------------------------
 
-# Declare phony targets 
-# This ensures these targets are always executed when called
-.PHONY: all report clean
+# Declare phony targets (not associated with real files)
+.PHONY: all install report clean
 
-# Define the default target
-# When you type 'make' without arguments, it will run 'all',
-# which depends on 'report'.
+# Default target: build the final HTML report
 all: report
 
-# ----------------------------------------------------------
-# report: compile fp.Rmd into HTML
+# Render the R Markdown report
 report:
-	Rscript -e "rmarkdown::render('fp.Rmd', output_format='html_document')"
+	Rscript -e "rmarkdown::render('final_report.Rmd', output_format = 'html_document')"
 
-# ----------------------------------------------------------
-# clean: remove generated/temporary files
+# Restore the project environment using renv (required rule: "install")
+install:
+	Rscript -e "renv::restore()"
+
+# Clean: remove the generated HTML report
 clean:
-	rm -f fp.html
+	rm -f final_report.html
 
