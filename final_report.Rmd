@@ -1,0 +1,71 @@
+---
+title: "Final Project Sleep Effciency"
+author: "Yilin Zhang"
+date: "2025-02-21"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(here)
+library(knitr)
+library(readr)
+library(ggplot2)
+```
+
+```{r}
+source("Code/analysis_script.R")
+```
+
+# Introduction 
+ This project will use the "Sleep_Efficiency.csv" dataset. This dataset contains multiple indicators related to sleep quality, sleep duration, sleep depth, and lifestyle habits (such as caffeine intake, smoking, exercise frequency, etc.). It aims to explore the possible relationship between different variables (such as caffeine intake, alcohol intake, exercise frequency, etc.) and sleep efficiency; build regression models and compare their prediction errors to evaluate the impact of these variables on sleep efficiency; and use tables and visualizations to better understand the data.
+ 
+# Table 1: Descriptive Statistics 
+```{r}
+desc_stats <- read_csv(here("Output", "table1_desc_stats.csv"), show_col_types = FALSE)
+kable(desc_stats, caption = "Table 1. Selected Descriptive Statistics of the Sleep Data")
+```
+From Table 1, we can see that the average age of the subjects in this dataset is about 40.8 years old, the average sleep duration is about 7.45  hours, the average sleep efficiency is 0.789, the average deep sleep percentage and the average REM sleep percentage are 52.82% and 22.68% respectively.
+
+# EDA
+## Correlation between all the variables
+```{r}
+knitr::include_graphics(here("Output", "corrplot_matrix.png"))
+```
+The matrix above visualizes correlations between key numeric variables. Some variables show moderate to strong relationships with sleep efficiency.
+
+## Sleep-Related Factors
+```{r}
+knitr::include_graphics(here("Output", "corrplot_sleep_factors.png"))
+```
+Sleep efficiency and deep sleep percentage show a strong positive correlation (about 0.79). In other words, the higher the proportion of deep sleep, the higher the sleep efficiency. Sleep efficiency and awakenings show a significant negative correlation (about -0.57). This means that if there are more awakenings during the night, the overall sleep efficiency tends to decrease. Deep sleep percentage and light sleep percentage show a significant negative correlation (about -0.98). This reflects the relationship between deep sleep and light sleep in a total sleep time: when deep sleep increases, light sleep will naturally decrease. The correlation between REM sleep percentage and sleep efficiency is not high (around 0 ~ 0.1), indicating that the impact of REM sleep percentage on overall sleep efficiency may be weak or not linear.
+
+# Figures Demonstrating Relationships
+## Caffeine Consumption vs. Sleep Efficiency
+```{r}
+knitr::include_graphics(here("Output", "figure1_caffeine_vs_eff.png"))
+```
+From the scatter plot, the trend between caffeine intake and sleep efficiency differs by gender. For males, higher caffeine intake appears to be associated with better sleep efficiency, while for females, the trend is reversed.
+
+## Alcohol Consumption vs. Bedtime
+```{r}
+sleep1 <- read_csv(here("Data", "Sleep_Efficiency.csv"), show_col_types = FALSE) %>% drop_na()
+ggplot(data = sleep1, aes(x = alchol_consumption, y = bedtime)) +
+  geom_point() +
+  stat_smooth(method = "lm", se = TRUE) +
+  theme_minimal()
+```
+The regression line is relatively flat, indicating that the linear relationship between different alcohol intakes and bedtimes in this data set is not obvious, or that "how much alcohol you drink" does not seem to make people go to bed earlier or later.
+
+# Multiple Linear Regression
+
+```{r}
+regression_results <- read_csv(here("Output", "regression_results.csv"), show_col_types = FALSE)
+kable(regression_results, caption = "Adjusted R² of Models with Increasing Predictors")
+
+```
+From the perspective of multiple linear regression, the f8 model performed best (Adjusted R^2 ~ 0.80). Considering only the linear model, the model that included eight variables, deep sleep proportion, number of awakenings, alcohol intake, smoking, exercise frequency, age, caffeine intake, and REM sleep proportion, seemed to be able to best explain or predict sleep efficiency.
+
+#Conclusion
+This analysis suggests that deep sleep percentage and awakenings are among the strongest predictors of sleep efficiency. Other lifestyle factors such as exercise frequency, caffeine intake, and alcohol consumption also show moderate effects. These findings support the idea that both sleep structure and daily habits play key roles in sleep quality.
+
