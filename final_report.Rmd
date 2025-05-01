@@ -49,11 +49,7 @@ From the scatter plot, the trend between caffeine intake and sleep efficiency di
 
 ## Alcohol Consumption vs. Bedtime
 ```{r}
-sleep1 <- read_csv(here("Data", "Sleep_Efficiency.csv"), show_col_types = FALSE) %>% drop_na()
-ggplot(data = sleep1, aes(x = alchol_consumption, y = bedtime)) +
-  geom_point() +
-  stat_smooth(method = "lm", se = TRUE) +
-  theme_minimal()
+knitr::include_graphics(here("Output", "figure2_alcohol_vs_bedtime.png"))
 ```
 The regression line is relatively flat, indicating that the linear relationship between different alcohol intakes and bedtimes in this data set is not obvious, or that "how much alcohol you drink" does not seem to make people go to bed earlier or later.
 

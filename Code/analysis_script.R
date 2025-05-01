@@ -94,6 +94,7 @@ regression_results <- tibble::tibble(
 
 write_csv(regression_results, here("Output", "regression_results.csv"))
 
+
 ## 6. Correlation Analysis chart
 cor_data <- sleep1 %>%
   select(sleep_efficiency, rem_sleep_percentage, deep_sleep_percentage, 
@@ -121,3 +122,14 @@ corrplot(cor(cor_data[c("sleep_efficiency", "deep_sleep_percentage", "rem_sleep_
          method = "number", type = "upper")
 ggsave(here("Output", "corrplot_sleep_factors.png"), width = 6, height = 5)
 
+## 7. Alcohol Consumption vs. Bedtime
+p2 <- ggplot(data = sleep1, aes(x = alchol_consumption, y = bedtime)) +
+  geom_point() +
+  stat_smooth(method = "lm", se = TRUE) +
+  theme_minimal()
+
+ggsave(
+  filename = here("Output", "figure2_alcohol_vs_bedtime.png"),
+  plot = p2,
+  width = 6, height = 4, dpi = 300
+)

@@ -1,0 +1,6 @@
+renv/library/
+Output/
+.Rhistory
+.RData
+*.html
+*_files/

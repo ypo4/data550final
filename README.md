@@ -60,7 +60,9 @@ make docker-build
 # Run & fetch report
 mkdir -p report
 make docker-run          # final_report.html appears in ./report
-You can also pull the image directly from DockerHub:
+## DockerHub
+The image is available publicly at: https://hub.docker.com/r/ypo4/sleep-efficiency
+You can pull it using:
+```bash
 docker pull ypo4/sleep-efficiency:latest
-DockerHub page: https://hub.docker.com/r/ypo4/sleep-efficiency
 

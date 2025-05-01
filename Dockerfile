@@ -3,7 +3,14 @@
 FROM rocker/r-ubuntu                   
 
 # Install pandoc for RMarkdown rendering
-RUN apt-get update && apt-get install -y pandoc
+RUN apt-get update && apt-get install -y \
+    pandoc \
+    libxml2-dev \
+    libssl-dev \
+    libcurl4-openssl-dev \
+    libfontconfig1-dev \
+    libfreetype6-dev \
+    libx11-dev
 
 # Set working directory inside container
 WORKDIR /project                        
@@ -18,7 +25,9 @@ COPY final_report.Rmd .
 COPY Makefile .
 COPY .Rprofile .
 COPY renv.lock .
-COPY renv/activate.R renv/settings.dcf renv/
+COPY renv/activate.R renv/
+COPY renv/settings.json renv/
+
 
 # Restore package environment
 RUN Rscript -e "renv::restore(prompt = FALSE)"

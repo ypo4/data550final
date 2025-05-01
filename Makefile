@@ -23,8 +23,8 @@ clean:
 
 # ---------- Docker targets ----------
 docker-build:                      
-	docker build -t <YOUR_DOCKERHUB_USER>/sleep-efficiency:latest .
+	docker build -t ypo4/sleep-efficiency:latest .
 
 docker-run:                         
-	docker run --rm -v "/$(PWD)/report":/project/report <YOUR_DOCKERHUB_USER>/sleep-efficiency:latest
+	docker run --rm -v "/$(PWD)/report":/project/report  ypo4/sleep-efficiency:latest
 
