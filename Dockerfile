@@ -19,9 +19,6 @@ WORKDIR /project
 RUN mkdir Code Data Output report
 
 # Copy project files into image
-COPY Code Code
-COPY Data Data
-COPY final_report.Rmd .
 COPY Makefile .
 COPY .Rprofile .
 COPY renv.lock .
@@ -29,9 +26,13 @@ COPY renv/activate.R renv/
 COPY renv/settings.json renv/
 
 
+
 # Restore package environment
 RUN Rscript -e "renv::restore(prompt = FALSE)"
 
+COPY Code Code
+COPY Data Data
+COPY final_report.Rmd .
 # ---------- ENTRY POINT ----------
 # 1) knit report via Makefile
 # 2) move html into /project/report so it ends up in mounted volume
