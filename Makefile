@@ -21,3 +21,10 @@ install:
 clean:
 	rm -f final_report.html
 
+# ---------- Docker targets ----------
+docker-build:                      
+	docker build -t <YOUR_DOCKERHUB_USER>/sleep-efficiency:latest .
+
+docker-run:                         
+	docker run --rm -v "/$(PWD)/report":/project/report <YOUR_DOCKERHUB_USER>/sleep-efficiency:latest
+

@@ -50,3 +50,17 @@ Command	What it does
 make install	Restore package environment via renv
 make (or make report)	Render final_report.Rmd → final_report.html
 make clean	Remove the generated HTML report
+
+## Docker usage 
+
+```bash
+# Build (one time)
+make docker-build
+
+# Run & fetch report
+mkdir -p report
+make docker-run          # final_report.html appears in ./report
+You can also pull the image directly from DockerHub:
+docker pull ypo4/sleep-efficiency:latest
+DockerHub page: https://hub.docker.com/r/ypo4/sleep-efficiency
+
